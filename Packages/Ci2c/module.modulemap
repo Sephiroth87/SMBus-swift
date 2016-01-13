@@ -1,0 +1,4 @@
+module Ci2c [system] {
+    header "i2c.h"
+    export *
+}
