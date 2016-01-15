@@ -1,5 +1,6 @@
 #SMBus-swift
 <a href="https://gitter.im/Sephiroth87/SMBus-swift?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><img src="https://badges.gitter.im/Join%20Chat.svg" alt="Join the chat at https://gitter.im/Sephiroth87/SMBus-swift" /></a>
+
 SMBus-swift is a (incomplete) linux library to communicate with SMBus/i2c devices through /dev/i2c.
 
 ##Installation
