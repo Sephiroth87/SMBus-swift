@@ -86,6 +86,16 @@ public class SMBus {
         return data.array
     }
     
+    public func readI2CBlockData(address: Int32, command: UInt8, length: Int = 32) throws -> [UInt8] {
+        try setAddress(address)
+        var data = i2c_smbus_data()
+        data.block.0 = UInt8(min(length, 32))
+        if i2c_smbus_access(fd, Int8(I2C_SMBUS_READ), command, length == 32 ? I2C_SMBUS_I2C_BLOCK_BROKEN : I2C_SMBUS_I2C_BLOCK_DATA, &data) != 0 {
+            throw SMBusError.IOError(errno)
+        }
+        return data.array
+    }
+    
     //MARK: Write
     
     public func writeQuick(address: Int32) throws {
@@ -143,11 +153,10 @@ public class SMBus {
         return data.array
     }
     
-    public func writeI2CBlockData(address: Int32, command: UInt8, data: [UInt8]) throws {
+    public func writeI2CBlockData(address: Int32, command: UInt8, values: [UInt8]) throws {
         try setAddress(address)
-        var data = i2c_smbus_data(array: data)
-        let result = i2c_smbus_access(fd, Int8(I2C_SMBUS_WRITE), command, I2C_SMBUS_I2C_BLOCK_BROKEN, &data)
-        if result != 0 {
+        var data = i2c_smbus_data(array: values)
+        if i2c_smbus_access(fd, Int8(I2C_SMBUS_WRITE), command, I2C_SMBUS_I2C_BLOCK_BROKEN, &data) != 0 {
             throw SMBusError.IOError(errno)
         }
     }
