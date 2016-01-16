@@ -157,9 +157,8 @@ public class SMBus {
     private func setAddress(address: Int32) throws {
         if self.address != address {
             self.address = address
-            let result = ioctl_int(fd, UInt(I2C_SLAVE), address)
-            if result != 0 {
-                throw SMBusError.IOError(result)
+            if ioctl_int(fd, UInt(I2C_SLAVE), address) != 0 {
+                throw SMBusError.IOError(errno)
             }
         }
     }
