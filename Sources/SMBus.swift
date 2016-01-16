@@ -11,8 +11,8 @@ import Ci2c
 import Glibc
 
 public enum SMBusError: ErrorType {
-    case OpenError
-    case CloseError
+    case OpenError(Int32)
+    case CloseError(Int32)
     case IOError(Int32)
 }
 
@@ -35,13 +35,13 @@ public class SMBus {
     public func open(busNumber: Int) throws {
         fd = Glibc.open("/dev/i2c-\(busNumber)", O_RDWR)
         if fd < 0 {
-            throw SMBusError.OpenError
+            throw SMBusError.OpenError(errno)
         }
     }
     
     public func close() throws {
         if fd != -1 && Glibc.close(fd) < 0 {
-            throw SMBusError.CloseError
+            throw SMBusError.CloseError(errno)
         }
         fd = -1
         address = -1
