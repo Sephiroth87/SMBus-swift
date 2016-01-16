@@ -23,6 +23,6 @@ try bus.writeI2CBlockData(0x60, command: UInt8(0x01), values: [UInt8(2)])
 ```
 
 ##TODO
-- [*] Add missing functions
+- [x] Add missing functions
 - [ ] Add documentation
 - [ ] Support Package Manager
