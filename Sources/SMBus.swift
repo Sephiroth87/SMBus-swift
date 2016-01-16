@@ -18,9 +18,10 @@ public enum SMBusError: ErrorType {
 
 public class SMBus {
     
-    
     private var fd: Int32 = -1
+    private var busNumber: Int = -1
     private var address: Int32 = -1
+    public private(set) var pec: Bool = false
     
     //MARK: Setup
     
@@ -37,6 +38,7 @@ public class SMBus {
         if fd < 0 {
             throw SMBusError.OpenError(errno)
         }
+        self.busNumber = busNumber
     }
     
     public func close() throws {
@@ -44,7 +46,9 @@ public class SMBus {
             throw SMBusError.CloseError(errno)
         }
         fd = -1
+        busNumber = -1
         address = -1
+        pec = false
     }
     
     //MARK: Read
@@ -166,6 +170,23 @@ public class SMBus {
                 throw SMBusError.IOError(errno)
             }
         }
+    }
+    
+    public func setPEC(pec: Bool) throws {
+        if self.pec != pec {
+            if ioctl_int(fd, UInt(I2C_PEC), pec ? 1 : 0) != 0 {
+                throw SMBusError.IOError(errno)
+            }
+            self.pec = pec
+        }
+    }
+    
+}
+
+extension SMBus: CustomStringConvertible {
+    
+    public var description: String {
+        return fd == -1 ? "SMBus closed" : "SMBus open on /dev/i2c-\(busNumber) - Current address: \(address) - PEC " + (pec ? "enabled" : "disabled")
     }
     
 }
