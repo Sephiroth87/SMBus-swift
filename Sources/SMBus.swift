@@ -10,16 +10,19 @@ import CioctlHelper
 import Ci2c
 import Glibc
 
+public enum SMBusError: ErrorType {
+    case OpenError
+    case CloseError
+    case IOError(Int32)
+}
+
 public class SMBus {
     
-    enum SMBusError: ErrorType {
-        case OpenError
-        case CloseError
-        case IOError(Int32)
-    }
     
     private var fd: Int32 = -1
     private var address: Int32 = -1
+    
+    //MARK: Setup
     
     public init(busNumber: Int) throws {
         try open(busNumber)
@@ -44,14 +47,83 @@ public class SMBus {
         address = -1
     }
     
+    //MARK: Read
+    
+    public func readByte(address: Int32) throws -> UInt8 {
+        try setAddress(address)
+        let result = i2c_smbus_read_byte(fd)
+        if result == -1 {
+            throw SMBusError.IOError(errno)
+        }
+        return UInt8(truncatingBitPattern: result)
+    }
+    
+    public func readByteData(address: Int32, command: UInt8) throws -> UInt8 {
+        try setAddress(address)
+        let result = i2c_smbus_read_byte_data(fd, command)
+        if result == -1 {
+            throw SMBusError.IOError(errno)
+        }
+        return UInt8(truncatingBitPattern: result)
+    }
+    
+    public func readWordData(address: Int32, command: UInt8) throws -> UInt16 {
+        try setAddress(address)
+        let result = i2c_smbus_read_word_data(fd, command)
+        if result == -1 {
+            throw SMBusError.IOError(errno)
+        }
+        return UInt16(truncatingBitPattern: result)
+    }
+    
+    //MARK: Write
+    
+    public func writeQuick(address: Int32) throws {
+        try setAddress(address)
+        let result = i2c_smbus_write_quick(fd, UInt8(I2C_SMBUS_WRITE))
+        if result != 0 {
+            throw SMBusError.IOError(errno)
+        }
+    }
+    
+    public func writeByte(address: Int32,  value: UInt8) throws {
+        try setAddress(address)
+        if i2c_smbus_write_byte(fd, value) == -1 {
+            throw SMBusError.IOError(errno)
+        }
+    }
+    
+    public func writeByteData(address: Int32, command: UInt8,  value: UInt8) throws {
+        try setAddress(address)
+        if i2c_smbus_write_byte_data(fd, command, value) == -1 {
+            throw SMBusError.IOError(errno)
+        }
+    }
+    
+    public func writeWordData(address: Int32, command: UInt8,  value: UInt16) throws {
+        try setAddress(address)
+        if i2c_smbus_write_word_data(fd, command, value) == -1 {
+            throw SMBusError.IOError(errno)
+        }
+    }
+    
+    public func processCall(address: Int32, command: UInt8,  value: UInt16) throws {
+        try setAddress(address)
+        if i2c_smbus_process_call(fd, command, value) == -1 {
+            throw SMBusError.IOError(errno)
+        }
+    }
+    
     public func writeI2CBlockData(address: Int32, command: UInt8, data: [UInt8]) throws {
         try setAddress(address)
         var data = i2c_smbus_data(array: data)
         let result = i2c_smbus_access(fd, Int8(I2C_SMBUS_WRITE), command, I2C_SMBUS_I2C_BLOCK_BROKEN, &data)
         if result != 0 {
-            throw SMBusError.IOError(result)
+            throw SMBusError.IOError(errno)
         }
     }
+    
+    //MARK: Helpers
     
     private func setAddress(address: Int32) throws {
         if self.address != address {
