@@ -76,6 +76,16 @@ public class SMBus {
         return UInt16(truncatingBitPattern: result)
     }
     
+    public func readBlockData(address: Int32, command: UInt8) throws -> [UInt8] {
+        try setAddress(address)
+        var data = i2c_smbus_data()
+        let result = i2c_smbus_access(fd, Int8(I2C_SMBUS_READ), command, I2C_SMBUS_BLOCK_DATA, &data)
+        if result != 0 {
+            throw SMBusError.IOError(errno)
+        }
+        return data.array
+    }
+    
     //MARK: Write
     
     public func writeQuick(address: Int32) throws {
@@ -112,6 +122,25 @@ public class SMBus {
         if i2c_smbus_process_call(fd, command, value) == -1 {
             throw SMBusError.IOError(errno)
         }
+    }
+    
+    public func writeBlockData(address: Int32, command: UInt8, values: [UInt8]) throws {
+        try setAddress(address)
+        var data = i2c_smbus_data(array: values)
+        let result = i2c_smbus_access(fd, Int8(I2C_SMBUS_WRITE), command, I2C_SMBUS_BLOCK_DATA, &data)
+        if result != 0 {
+            throw SMBusError.IOError(errno)
+        }
+    }
+    
+    public func blockProcessCall(address: Int32, command: UInt8, values: [UInt8]) throws -> [UInt8] {
+        try setAddress(address)
+        var data = i2c_smbus_data(array: values)
+        let result = i2c_smbus_access(fd, Int8(I2C_SMBUS_WRITE), command, I2C_SMBUS_BLOCK_PROC_CALL, &data)
+        if result != 0 {
+            throw SMBusError.IOError(errno)
+        }
+        return data.array
     }
     
     public func writeI2CBlockData(address: Int32, command: UInt8, data: [UInt8]) throws {
@@ -177,6 +206,10 @@ private extension i2c_smbus_data {
         self.block.30 = value(29)
         self.block.31 = value(30)
         self.block.32 = value(31)
+    }
+    
+    var array: [UInt8] {
+        return Array(Mirror(reflecting: block).children.flatMap({ $0.value as? UInt8 })[1...Int(self.block.0)])
     }
     
 }
