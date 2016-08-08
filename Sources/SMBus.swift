@@ -18,9 +18,9 @@ public enum SMBusError: Error {
 
 public class SMBus {
     
-    public private(set) var fd: Int32 = -1
-    public private(set) var busNumber: Int = -1
-    public private(set) var address: Int32 = -1
+    private(set) var fd: Int32 = -1
+    private(set) var busNumber: Int = -1
+    private(set) var address: Int32 = -1
     public private(set) var pec: Bool = false
     
     //MARK: Setup
