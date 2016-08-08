@@ -3,6 +3,23 @@
 
 SMBus-swift is a linux library to communicate with SMBus/I2C devices through /dev/i2c.
 
+##Requirements
+Before beign able to use SMBus in your Swift code, you should install some Linux C libraries.
+
+On a Debian-like distro:
+
+	sudo apt-get install i2c-tools libi2c-dev
+	
+Then you have to make sure the i2c module is active. So check or add `i2c-dev` to `/etc/modules`. Like:
+
+	# /etc/modules: kernel modules to load at boot time.
+	#
+	# This file contains the names of kernel modules that should be loaded
+	# at boot time, one per line. Lines beginning with 	"#" are ignored.
+	
+	i2c-dev
+
+
 ##Installation
 The library is being written for/on a Raspberry Pi where the Package Manager is not functional yet, so I couldn't really figure out a way to make it work with that, and you'll have to do it manually for now.
 After cloning, compile your program adding the 2 system dependencies and the main file, like
