@@ -36,7 +36,7 @@ try bus = SMBus(busNumber: 1) // opens /dev/i2c-1
 ```
 and then send your commands:
 ```
-try bus.writeI2CBlockData(0x60, command: UInt8(0x01), values: [UInt8(2)])
+try bus.writeI2CBlockData(address: 0x60, command: UInt8(0x01), values: [UInt8(2)])
 ```
 
 ##TODO
